@@ -48,6 +48,7 @@ function App() {
   // Email state
   const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   // Compose form state
   const [recipient, setRecipient] = useState('');
@@ -62,6 +63,72 @@ function App() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
   }, []);
+
+  // Load past messages from the blockchain
+  const loadMessages = async (blockMail: ethers.Contract, address: string) => {
+    setIsLoadingMessages(true);
+    try {
+      // Get message events where user is sender or receiver
+      const filterTo = blockMail.filters.Message(null, address);
+      const filterFrom = blockMail.filters.Message(address, null);
+
+      // Query from block 0 to latest
+      const [receivedEvents, sentEvents] = await Promise.all([
+        blockMail.queryFilter(filterTo),
+        blockMail.queryFilter(filterFrom),
+      ]);
+
+      const loadedEmails: Email[] = [];
+
+      // Process received messages
+      for (const event of receivedEvents) {
+        const log = event as ethers.EventLog;
+        const [from, to, cid, , sentAt] = log.args;
+        loadedEmails.push({
+          id: `${cid}-${sentAt.toString()}-received`,
+          from,
+          to,
+          subject: `Message from ${shortenAddress(from)}`,
+          body: `CID: ${cid}`,
+          cid,
+          timestamp: new Date(Number(sentAt) * 1000),
+          read: false,
+          direction: 'received',
+        });
+      }
+
+      // Process sent messages
+      for (const event of sentEvents) {
+        const log = event as ethers.EventLog;
+        const [from, to, cid, , sentAt] = log.args;
+        loadedEmails.push({
+          id: `${cid}-${sentAt.toString()}-sent`,
+          from,
+          to,
+          subject: `Message to ${shortenAddress(to)}`,
+          body: `CID: ${cid}`,
+          cid,
+          timestamp: new Date(Number(sentAt) * 1000),
+          read: true,
+          direction: 'sent',
+        });
+      }
+
+      // Sort by timestamp (newest first)
+      loadedEmails.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+      setEmails(loadedEmails);
+
+      if (loadedEmails.length > 0) {
+        showToast(`Loaded ${loadedEmails.length} message(s)`, 'success');
+      }
+    } catch (err) {
+      console.error('Failed to load messages:', err);
+      showToast('Failed to load messages', 'error');
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
 
   // Connect to local Hardhat node
   const connectHardhat = async (accountIndex: number) => {
@@ -81,11 +148,16 @@ function App() {
       setIsConnected(true);
       setShowConnectModal(false);
 
-      // Listen for incoming messages
+      showToast('Connected to Hardhat!', 'success');
+
+      // Load past messages
+      await loadMessages(blockMail, address);
+
+      // Listen for new incoming messages
       blockMail.on('Message', (from: string, to: string, cid: string, _metaHash: string, sentAt: bigint) => {
         if (to.toLowerCase() === address.toLowerCase()) {
           const newEmail: Email = {
-            id: `${cid}-${sentAt.toString()}`,
+            id: `${cid}-${sentAt.toString()}-received`,
             from,
             to,
             subject: `Message from ${shortenAddress(from)}`,
@@ -99,8 +171,6 @@ function App() {
           showToast('New message received!', 'success');
         }
       });
-
-      showToast('Connected to Hardhat!', 'success');
     } catch (err) {
       console.error('Connection failed:', err);
       showToast('Failed to connect. Is Hardhat running?', 'error');
@@ -138,6 +208,9 @@ function App() {
       setShowConnectModal(false);
 
       showToast('Connected via MetaMask!', 'success');
+
+      // Load past messages
+      await loadMessages(blockMail, address);
     } catch (err) {
       console.error('MetaMask connection failed:', err);
       showToast('MetaMask connection failed', 'error');
@@ -153,6 +226,7 @@ function App() {
     setContract(null);
     setUserAddress('');
     setNetworkName('');
+    setEmails([]);
   };
 
   // Send message
@@ -304,7 +378,17 @@ function App() {
               </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-thin">
-                {emails.length === 0 ? (
+                {isLoadingMessages ? (
+                  /* Loading State */
+                  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                    <div className="w-16 h-16 mb-6 relative">
+                      <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                      <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-300 mb-2">Loading Messages</h3>
+                    <p className="text-sm text-slate-500">Fetching your emails from the blockchain...</p>
+                  </div>
+                ) : emails.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                     <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-4xl mb-6 border border-white/10">
                       📬
