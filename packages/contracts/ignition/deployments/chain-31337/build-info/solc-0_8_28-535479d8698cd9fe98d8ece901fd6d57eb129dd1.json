@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-535479d8698cd9fe98d8ece901fd6d57eb129dd1",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/BlockMail.sol": "project/contracts/BlockMail.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/BlockMail.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract BlockMail {\n    event SendEmail(\n        address indexed from,\n        address indexed to,\n        bytes32 indexed digest,\n        string cid,\n        uint256 timestamp\n    );\n\n    function sendEmail(address to, bytes32 digest, string calldata cid) external {\n        emit SendEmail(msg.sender, to, digest, cid, block.timestamp);\n    }\n}\n"
+      }
+    }
+  }
+}

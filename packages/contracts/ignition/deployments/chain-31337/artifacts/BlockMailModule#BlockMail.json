@@ -1,0 +1,74 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "BlockMail",
+  "sourceName": "contracts/BlockMail.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "cid",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "SendEmail",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "digest",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "cid",
+          "type": "string"
+        }
+      ],
+      "name": "sendEmail",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f5ffd5b506101958061001c5f395ff3fe608060405234801561000f575f5ffd5b5060043610610029575f3560e01c806345fd17051461002d575b5f5ffd5b61004061003b366004610098565b610042565b005b82846001600160a01b0316336001600160a01b03167f7aaa22d80ee66f226500a7041e6fb9d080a876bffc0195a250182452d5e2bc5285854260405161008a93929190610128565b60405180910390a450505050565b5f5f5f5f606085870312156100ab575f5ffd5b84356001600160a01b03811681146100c1575f5ffd5b935060208501359250604085013567ffffffffffffffff8111156100e3575f5ffd5b8501601f810187136100f3575f5ffd5b803567ffffffffffffffff811115610109575f5ffd5b87602082840101111561011a575f5ffd5b949793965060200194505050565b60408152826040820152828460608301375f606084830101525f6060601f19601f860116830101905082602083015294935050505056fea2646970667358221220a765d1db3ebddcdac9983a21ab3723b7e2d29e079d6e60a4d2a9ad0ef6c1a6e464736f6c634300081c0033",
+  "deployedBytecode": "0x608060405234801561000f575f5ffd5b5060043610610029575f3560e01c806345fd17051461002d575b5f5ffd5b61004061003b366004610098565b610042565b005b82846001600160a01b0316336001600160a01b03167f7aaa22d80ee66f226500a7041e6fb9d080a876bffc0195a250182452d5e2bc5285854260405161008a93929190610128565b60405180910390a450505050565b5f5f5f5f606085870312156100ab575f5ffd5b84356001600160a01b03811681146100c1575f5ffd5b935060208501359250604085013567ffffffffffffffff8111156100e3575f5ffd5b8501601f810187136100f3575f5ffd5b803567ffffffffffffffff811115610109575f5ffd5b87602082840101111561011a575f5ffd5b949793965060200194505050565b60408152826040820152828460608301375f606084830101525f6060601f19601f860116830101905082602083015294935050505056fea2646970667358221220a765d1db3ebddcdac9983a21ab3723b7e2d29e079d6e60a4d2a9ad0ef6c1a6e464736f6c634300081c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/BlockMail.sol",
+  "buildInfoId": "solc-0_8_28-535479d8698cd9fe98d8ece901fd6d57eb129dd1"
+}
