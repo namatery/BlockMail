@@ -53,12 +53,16 @@ export const CONTRACT_ABI = [
   }
 ]
 
-// Contract address (Hardhat local deployment)
-export const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+// Contract address (from environment variables)
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
-// Hardhat RPC URLs
-export const HARDHAT_RPC_URL = 'http://127.0.0.1:8545';
-export const HARDHAT_WS_URL = 'ws://127.0.0.1:8545';
+// RPC URLs (from environment variables)
+export const RPC_URL = import.meta.env.VITE_RPC_URL || 'http://127.0.0.1:8545';
+export const WS_URL = import.meta.env.VITE_WS_URL || 'ws://127.0.0.1:8545';
+
+// Pinata IPFS (from environment variables)
+export const PINATA_JWT = import.meta.env.VITE_PINATA_JWT || '';
+export const PINATA_GATEWAY = import.meta.env.VITE_PINATA_GATEWAY || '';
 
 // Hardhat default accounts
 export const HARDHAT_ACCOUNTS: HardhatAccount[] = [

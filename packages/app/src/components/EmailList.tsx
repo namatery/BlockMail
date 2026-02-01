@@ -1,6 +1,6 @@
 import { Email } from '../types';
 import { shortenAddress, formatTime } from '../utils/helpers';
-import { HARDHAT_ACCOUNTS } from '../config/constants';
+import { HARDHAT_ACCOUNTS, PINATA_JWT, PINATA_GATEWAY } from '../config/constants';
 import { useEffect, useState, useRef } from 'react';
 import { ethers } from 'ethers';
 import { PinataSDK } from 'pinata';
@@ -13,8 +13,8 @@ interface EmailListProps {
 }
 
 const pinata = new PinataSDK({
-  pinataJwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI5NDFmNTA5Ni0zY2M0LTRjNDItOTUyMC1mM2NmNmUxNjA3MjQiLCJlbWFpbCI6ImFsaXJlemEucmV6YXBvdXIubWVAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6ImMxODFjYzg3YjNiNmEyZDVkZTNlIiwic2NvcGVkS2V5U2VjcmV0IjoiZGIxMjZkZWE1MGZkYjRmYzg2MTZmNjBmM2I3NmIyZDdhNTVhMmUyNWViMWIxODRhY2E1MGI3YzUzYzA3NzI3NyIsImV4cCI6MTgwMTQxNjgyN30.2n3hPQ-DMvcoW3HqV1oDhDnOp-djpsoq6OPpk-7DOzA',
-  pinataGateway: 'chocolate-binding-mite-544.mypinata.cloud'
+  pinataJwt: PINATA_JWT,
+  pinataGateway: PINATA_GATEWAY
 })
 
 
