@@ -77,6 +77,9 @@ Edit `packages/app/.env` with your configuration:
 # Contract address (use default for local development)
 VITE_CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
 
+# KeyRegistry contract - use the "KeyRegistry deployed to: 0x..." address from deploy script
+VITE_KEY_REGISTRY_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+
 # RPC URLs
 VITE_RPC_URL=http://127.0.0.1:8545
 VITE_WS_URL=ws://127.0.0.1:8545
