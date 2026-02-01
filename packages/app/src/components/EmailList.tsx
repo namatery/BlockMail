@@ -23,7 +23,6 @@ const POLL_INTERVAL = 30; // seconds
 export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }: EmailListProps) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [countdown, setCountdown] = useState(POLL_INTERVAL);
 
   // Immediately add sent email when passed from ComposeForm
   useEffect(() => {
@@ -57,22 +56,12 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
       setEmails(loadedEmails);
       
       lastBlockRef.current = currentBlock;
-      setCountdown(POLL_INTERVAL);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
       setIsRefreshing(false);
     }
   };
-
-  // Countdown timer
-  useEffect(() => {
-    const countdownInterval = setInterval(() => {
-      setCountdown(prev => (prev <= 1 ? POLL_INTERVAL : prev - 1));
-    }, 1000);
-
-    return () => clearInterval(countdownInterval);
-  }, []);
 
   useEffect(() => {
     setIsLoading(true);
@@ -115,7 +104,6 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
         }
 
         lastBlockRef.current = currentBlock;
-        setCountdown(POLL_INTERVAL); // Reset countdown
       } catch (error) {
         console.error('Polling error:', error);
       }
