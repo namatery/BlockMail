@@ -22,7 +22,6 @@ function App() {
     networkName,
     isReconnecting,
     connectHardhat,
-    connectMetaMask,
     disconnect,
     addEmail,
     markAsRead,
@@ -49,11 +48,6 @@ function App() {
   // Handle connect
   const handleConnectHardhat = async (index: number) => {
     await connectHardhat(index);
-    setShowConnectModal(false);
-  };
-
-  const handleConnectMetaMask = async () => {
-    await connectMetaMask();
     setShowConnectModal(false);
   };
 
@@ -110,7 +104,6 @@ function App() {
         isOpen={showConnectModal}
         onClose={() => setShowConnectModal(false)}
         onConnectHardhat={handleConnectHardhat}
-        onConnectMetaMask={handleConnectMetaMask}
       />
 
       <EmailDetailModal

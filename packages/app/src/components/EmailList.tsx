@@ -44,17 +44,17 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
   const handleRefresh = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
-    
+
     try {
       const provider = contract.runner?.provider;
       if (!provider) return;
-      
+
       const currentBlock = await provider.getBlockNumber();
-      
+
       // Query for ALL events (full reload)
       const loadedEmails = await loadEmails(userAddress, contract);
       setEmails(loadedEmails);
-      
+
       lastBlockRef.current = currentBlock;
     } catch (error) {
       console.error('Refresh error:', error);
@@ -71,7 +71,7 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
       try {
         const provider = contract.runner?.provider;
         if (!provider) return;
-        
+
         const currentBlock = await provider.getBlockNumber();
         if (currentBlock <= lastBlockRef.current) return;
 
@@ -85,7 +85,7 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
         ]);
 
         const newEvents = [...eventsTo, ...eventsFrom];
-        
+
         for (const ev of newEvents) {
           const args = (ev as any).args;
           const cid = args.cid;
@@ -154,10 +154,10 @@ export function EmailList({ userAddress, contract, onEmailClick, newSentEmail }:
             className="p-1.5 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50"
             title="Refresh inbox"
           >
-            <svg 
-              className={`w-4 h-4 text-slate-400 ${isRefreshing ? 'animate-spin' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className={`w-4 h-4 text-slate-400 ${isRefreshing ? 'animate-spin' : ''}`}
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -242,7 +242,7 @@ function EmailItem({ email, onClick }: EmailItemProps) {
             <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
             </svg>
-          ): (
+          ) : (
             <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>

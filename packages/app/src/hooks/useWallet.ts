@@ -7,8 +7,8 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS, WS_URL } from '../config/constants';
 const STORAGE_KEY = 'blockmail_connection';
 
 interface ConnectionInfo {
-  type: 'hardhat' | 'metamask';
-  accountIndex?: number;
+  type: 'hardhat';
+  accountIndex: number;
 }
 
 interface UseWalletReturn {
@@ -19,7 +19,6 @@ interface UseWalletReturn {
   emails: Email[];
   isReconnecting: boolean;
   connectHardhat: (accountIndex: number) => Promise<void>;
-  connectMetaMask: () => Promise<void>;
   disconnect: () => void;
   addEmail: (email: Email) => void;
   markAsRead: (emailId: string) => void;
@@ -69,45 +68,6 @@ export function useWallet(
     }
   }, [showToast]);
 
-  // Connect via MetaMask
-  const connectMetaMask = useCallback(async () => {
-    try {
-      if (typeof window.ethereum === 'undefined') {
-        showToast('MetaMask not found. Use Hardhat for local development.', 'error');
-        return;
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
-
-      if (accounts.length === 0) {
-        showToast('No accounts found', 'error');
-        return;
-      }
-
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-      const network = await provider.getNetwork();
-
-      const blockMail = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-      setContract(blockMail);
-      setUserAddress(address);
-      setNetworkName(network.name || `Chain ${network.chainId}`);
-      setIsConnected(true);
-
-      // Save connection info for auto-reconnect
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
-        type: 'metamask' 
-      } as ConnectionInfo));
-
-      showToast('Connected via MetaMask!', 'success');
-    } catch (err) {
-      console.error('MetaMask connection failed:', err);
-      showToast('MetaMask connection failed', 'error');
-    }
-  }, [showToast]);
-
   // Disconnect
   const disconnect = useCallback(async () => {
     if (contract) {
@@ -144,10 +104,6 @@ export function useWallet(
         connectHardhat(connectionInfo.accountIndex).finally(() => {
           setIsReconnecting(false);
         });
-      } else if (connectionInfo.type === 'metamask') {
-        connectMetaMask().finally(() => {
-          setIsReconnecting(false);
-        });
       } else {
         setIsReconnecting(false);
       }
@@ -156,7 +112,7 @@ export function useWallet(
       localStorage.removeItem(STORAGE_KEY);
       setIsReconnecting(false);
     }
-  }, [connectHardhat, connectMetaMask]);
+  }, [connectHardhat]);
 
   // Add email
   const addEmail = useCallback((email: Email) => {
@@ -178,7 +134,6 @@ export function useWallet(
     emails,
     isReconnecting,
     connectHardhat,
-    connectMetaMask,
     disconnect,
     addEmail,
     markAsRead,

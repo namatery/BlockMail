@@ -5,14 +5,12 @@ interface ConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConnectHardhat: (accountIndex: number) => void;
-  onConnectMetaMask: () => void;
 }
 
 export function ConnectModal({
   isOpen,
   onClose,
   onConnectHardhat,
-  onConnectMetaMask
 }: ConnectModalProps) {
   if (!isOpen) return null;
 
@@ -58,32 +56,6 @@ export function ConnectModal({
               ))}
             </div>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-dark-card px-2 text-slate-500">or</span>
-            </div>
-          </div>
-
-          {/* MetaMask */}
-          <button
-            onClick={onConnectMetaMask}
-            className="w-full flex items-center justify-between px-4 py-3 bg-dark-secondary hover:bg-primary/10 border border-white/10 hover:border-primary/30 rounded-xl transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                🦊
-              </div>
-              <div className="text-left">
-                <div className="text-sm font-medium text-slate-200">MetaMask Extension</div>
-                <div className="text-xs text-slate-500">Connect via browser extension</div>
-              </div>
-            </div>
-            <span className="text-slate-500 group-hover:text-primary transition-colors">→</span>
-          </button>
         </div>
 
         <div className="px-6 py-4 border-t border-white/10 bg-white/2">
