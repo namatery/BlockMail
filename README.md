@@ -29,6 +29,8 @@ Messages are end-to-end encrypted, stored on IPFS, and metadata is recorded on t
 
 ## Screenshots
 
+![Connect](./screenshots/connect.png)
+
 ![Inbox](./screenshots/inbox.png)
 
 ![New Email](./screenshots/new_email.png)
