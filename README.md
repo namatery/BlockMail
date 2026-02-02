@@ -1,66 +1,33 @@
 # BlockMail
 
-A decentralized email system built on Ethereum blockchain with IPFS storage. Send and receive messages between Ethereum addresses with content stored on IPFS and metadata recorded on-chain.
+A decentralized email app where you can send encrypted messages between Ethereum addresses.  
+Messages are end-to-end encrypted, stored on IPFS, and metadata is recorded on the Ethereum blockchain.
 
-## Features
+## Key Features
 
-- **Decentralized Messaging**: Send messages directly between Ethereum addresses
-- **IPFS Storage**: Message content stored on IPFS via Pinata for permanent, decentralized storage
-- **On-Chain Records**: Message metadata (sender, recipient, timestamp, IPFS CID) recorded on Ethereum
-- **Desktop Application**: Native Electron app with modern React UI
+- Send & receive messages between Ethereum wallet addresses
+- End-to-end encryption with **perfect forward secrecy** (each message uses a fresh key)
+- Message content stored privately on **IPFS** (via Pinata)
+- Metadata (sender, recipient, timestamp, IPFS link) saved on-chain
+- Beautiful desktop app built with Electron + React
 
-## Architecture
+## How Encryption Works (Quick Overview)
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Electron App  │────▶│  Smart Contract │────▶│    Ethereum     │
-│   (React + TS)  │     │   (Solidity)    │     │   Blockchain    │
-└────────┬────────┘     └─────────────────┘     └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│   IPFS/Pinata   │
-│  (Message Data) │
-└─────────────────┘
-```
+1. You generate a personal X25519 key pair in the app.
+2. Your public key is saved on the blockchain (via KeyRegistry contract).
+3. When sending a message:
+   - The app creates a temporary (ephemeral) key just for that message.
+   - Encrypts the content so only the recipient can read it.
+   - Uploads the encrypted message to IPFS.
+4. The recipient decrypts it using their private key + the temporary public key you shared.
 
-## Project Structure
+→ Even if someone's long-term key is compromised later, old messages stay private.
 
-```
-blockmail/
-├── packages/
-│   ├── app/                    # Electron desktop application
-│   │   ├── src/
-│   │   │   ├── components/     # React UI (EmailList, ComposeModal, ConnectModal, …)
-│   │   │   ├── config/         # Constants & contract config
-│   │   │   ├── hooks/          # useWallet, useEmails, useToast
-│   │   │   ├── services/       # email, ipfsService, keyRegistry, storage
-│   │   │   ├── utils/          # Helpers
-│   │   │   ├── App.tsx
-│   │   │   ├── main.ts         # Electron main process
-│   │   │   ├── preload.ts      # Preload / IPC
-│   │   │   └── renderer.tsx    # React entry
-│   │   ├── index.html
-│   │   └── vite.*.config.mts  # Vite configs (main, preload, renderer)
-│   └── contracts/              # Solidity smart contracts
-│       ├── contracts/         # BlockMail.sol, KeyRegistry.sol
-│       ├── ignition/          # Hardhat Ignition deployment modules
-│       ├── scripts/           # deploy.ts
-│       └── test/              # Contract tests
-├── package.json               # Root workspace scripts
-└── README.md
-```
-
-## Prerequisites
-
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+**Note**: You cannot read messages you sent to others (this is by design for maximum privacy).
 
 ---
 
-## How to Run the Project (Step by Step)
-
-Follow these steps to run BlockMail manually: from deploying the contracts to starting the Electron app.
+## Quick Start
 
 ### Step 1: Install dependencies
 
@@ -139,6 +106,11 @@ npm run app:start
 The BlockMail desktop app window should open. You can use the local Hardhat accounts (and their private keys in the Hardhat output) to connect and test.
 
 ---
+
+## Project Folders
+
+- `packages/app` → The Electron + React desktop application
+- `packages/contracts` → Solidity smart contracts & deployment scripts
 
 ## License
 
