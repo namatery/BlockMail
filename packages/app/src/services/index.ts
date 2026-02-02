@@ -1,4 +1,4 @@
-export * from './keypairStorage';
-export * from './keyRegistryService';
+export * from './keyRegistry';
 export * from './ipfsService';
-export * from './emailService';
+export * from './email';
+export * from './storage';

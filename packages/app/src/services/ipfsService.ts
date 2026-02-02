@@ -5,48 +5,36 @@
 import { PinataSDK } from 'pinata';
 import { PINATA_JWT, PINATA_GATEWAY } from '../config/constants';
 
-let client: PinataSDK | null = null;
-
-function getClient(): PinataSDK {
-  if (!client) {
-    client = new PinataSDK({
-      pinataJwt: PINATA_JWT,
-      pinataGateway: PINATA_GATEWAY,
-    });
-  }
-  return client;
-}
-
-export interface EncryptedPayload {
+interface Payload {
   from: string;
   to: string;
-  nonce: string;
+  pk: string;
   ciphertext: string;
+  timestamp: number;
 }
 
-/** Upload encrypted email payload to IPFS. Returns CID. */
-export async function uploadEncrypted(payload: EncryptedPayload): Promise<string> {
-  const result = await getClient().upload.public.json({
-    from: payload.from,
-    to: payload.to,
-    nonce: payload.nonce,
-    ciphertext: payload.ciphertext,
-  });
-  return result.cid;
+class IpfsService {
+  private client: PinataSDK;
+
+  constructor(
+    private pinataJwt: string,
+    private pinataGateway: string,
+  ) {
+    this.client = new PinataSDK({
+      pinataJwt: this.pinataJwt,
+      pinataGateway: this.pinataGateway,
+    });
+  }
+
+  async upload(payload: Payload): Promise<string> {
+    const result = await this.client.upload.public.json(payload);
+    return result.cid;
+  }
+
+  async get(cid: string): Promise<Payload | null> {
+    const { data } = await this.client.gateways.public.get(cid);
+    return data as Payload | null;
+  }
 }
 
-export interface FetchedPayload {
-  from?: string;
-  to?: string;
-  subject?: string;
-  body?: string;
-  timestamp?: number;
-  nonce?: string;
-  ciphertext?: string;
-}
-
-/** Fetch content by CID from Pinata gateway. */
-export async function getByCid(cid: string): Promise<FetchedPayload> {
-  const { data } = await getClient().gateways.public.get(cid);
-  return (data ?? {}) as FetchedPayload;
-}
+export const ipfs = new IpfsService(PINATA_JWT, PINATA_GATEWAY);

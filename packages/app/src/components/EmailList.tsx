@@ -3,19 +3,18 @@ import { ethers } from 'ethers';
 import { Email } from '../types';
 import { shortenAddress, formatTime } from '../utils/helpers';
 import { useEmails } from '../hooks/useEmails';
+import { EmailService } from '../services';
 
 interface EmailListProps {
   userAddress: string;
-  contract: ethers.Contract;
-  keyRegistry: ethers.Contract | null;
+  emailService: EmailService;
   onEmailClick: (email: Email) => void;
   newSentEmail?: Email | null;
 }
 
 export function EmailList({
   userAddress,
-  contract,
-  keyRegistry,
+  emailService,
   onEmailClick,
   newSentEmail,
 }: EmailListProps) {
@@ -25,7 +24,7 @@ export function EmailList({
     isRefreshing,
     refresh,
     addEmail,
-  } = useEmails({ userAddress, contract, keyRegistry });
+  } = useEmails({ userAddress, emailService });
 
   useEffect(() => {
     if (newSentEmail) {

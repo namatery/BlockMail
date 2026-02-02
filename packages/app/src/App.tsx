@@ -20,9 +20,8 @@ function App() {
   const { toast, showToast } = useToast();
   const {
     isConnected,
+    emailService,
     isReconnecting,
-    contract,
-    keyRegistry,
     userAddress,
     networkName,
     cachedWallets,
@@ -88,16 +87,14 @@ function App() {
           <>
             <EmailList
               userAddress={userAddress}
-              contract={contract!}
-              keyRegistry={keyRegistry}
+              emailService={emailService!}
               onEmailClick={handleEmailClick}
               newSentEmail={newSentEmail}
             />
             <ComposeForm
               isConnected={isConnected}
               userAddress={userAddress}
-              contract={contract}
-              keyRegistry={keyRegistry}
+              emailService={emailService!}
               onMessageSent={(email) => {
                 addEmail(email);
                 setNewSentEmail(email);

@@ -2,26 +2,21 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
 import { Email } from '../types';
 import { CONTRACT_ABI, CONTRACT_ADDRESS, KEY_REGISTRY_ABI, KEY_REGISTRY_ADDRESS, RPC_URL } from '../config/constants';
-import { createKeypairLoader } from '../services/keypairStorage';
-import { registerPublicKey } from '../services/keyRegistryService';
+import { EmailService, KeyRegistryService , storage} from '../services';
 
-/** Cache key for last 3 connected wallets. Stored as array of { address, privateKey }, most recent first. */
-const CACHED_WALLETS_KEY = 'blockmail_cached_wallets';
-/** Legacy single-wallet cache key (migrated to CACHED_WALLETS_KEY on read). */
-const CACHED_WALLET_KEY_LEGACY = 'blockmail_cached_wallet';
 const MAX_CACHED_WALLETS = 3;
 
 function getCachedWalletsList(): { address: string; privateKey: string }[] {
-  const raw = localStorage.getItem(CACHED_WALLETS_KEY);
+  const raw = storage.get('cached_wallets', 'list');
   if (!raw) {
-    const legacy = localStorage.getItem(CACHED_WALLET_KEY_LEGACY);
+    const legacy = storage.get('cached_wallets', 'legacy');
     if (legacy) {
       try {
         const one = JSON.parse(legacy) as { address?: string; privateKey?: string };
         if (one?.address && one?.privateKey) {
           const list = [{ address: one.address, privateKey: one.privateKey }];
-          localStorage.setItem(CACHED_WALLETS_KEY, JSON.stringify(list));
-          localStorage.removeItem(CACHED_WALLET_KEY_LEGACY);
+          storage.set('cached_wallets', 'list', JSON.stringify(list));
+          storage.del('cached_wallets', 'legacy');
           return list;
         }
       } catch {
@@ -30,21 +25,18 @@ function getCachedWalletsList(): { address: string; privateKey: string }[] {
     }
     return [];
   }
+
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((w: unknown) => w && typeof w === 'object' && 'address' in w && 'privateKey' in w) : [];
+    return Array.isArray(parsed) ? 
+      parsed.filter((w: unknown) => w && typeof w === 'object' && 'address' in w && 'privateKey' in w) 
+      : [];
   } catch {
     return [];
   }
 }
 
-/** Set when user clicks Disconnect; prevents auto-restore on next page load. Cleared when user connects again. */
-const DISCONNECTED_KEY = 'blockmail_disconnected';
-
-/** 1 ETH in wei, for funding new wallets on local Hardhat. */
 const ONE_ETH = BigInt(1e18);
-
-/** Fund address on local Hardhat node so it can send txs. No-op if RPC doesn't support hardhat_setBalance. */
 async function fundAddressIfHardhat(provider: ethers.JsonRpcProvider, address: string): Promise<void> {
   try {
     const balanceHex = '0x' + ONE_ETH.toString(16);
@@ -73,6 +65,8 @@ interface UseWalletReturn {
   disconnect: () => void;
   addEmail: (email: Email) => void;
   markAsRead: (emailId: string) => void;
+  emailService: EmailService | null;
+  keyRegistryService: KeyRegistryService | null;
 }
 
 export function useWallet(
@@ -85,11 +79,14 @@ export function useWallet(
   const [networkName, setNetworkName] = useState('');
   const [emails, setEmails] = useState<Email[]>([]);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [keyRegistryService, setKeyRegistryService] = useState<KeyRegistryService | null>(null);
+  const [emailService, setEmailService] = useState<EmailService | null>(null);
   const [cachedWallets, setCachedWallets] = useState<{ address: string }[]>(() => {
     const list = getCachedWalletsList();
     return list.map((w) => ({ address: w.address })).slice(0, MAX_CACHED_WALLETS);
   });
   const hasRestoredRef = useRef(false);
+
 
   const connectWithWallet = useCallback(
     async (wallet: SignerLike) => {
@@ -112,31 +109,28 @@ export function useWallet(
         setNetworkName('Hardhat Local');
         setIsConnected(true);
 
+        const keyRegSvc = keyReg ? new KeyRegistryService(keyReg) : null;
+        const emailSvc = keyRegSvc ? new EmailService(blockMail, keyRegSvc) : null;
+        setKeyRegistryService(keyRegSvc);
+        setEmailService(emailSvc);
+
         // Keep last 3 connected wallets (most recent first)
         try {
           let list = getCachedWalletsList();
           list = list.filter((w) => w.address.toLowerCase() !== address.toLowerCase());
           list.unshift({ address, privateKey: wallet.privateKey });
           list = list.slice(0, MAX_CACHED_WALLETS);
-          localStorage.setItem(CACHED_WALLETS_KEY, JSON.stringify(list));
+          storage.set('cached_wallets', 'list', JSON.stringify(list));
           setCachedWallets(list.map((w) => ({ address: w.address })));
-          localStorage.removeItem(DISCONNECTED_KEY); // allow auto-restore on next load
+          storage.del('disconnected', 'key'); // allow auto-restore on next load
         } catch {
           // ignore storage errors
         }
 
         showToast('Wallet connected', 'success');
 
-        if (keyReg) {
-          const loader = createKeypairLoader(address);
-          registerPublicKey(keyReg, address, loader)
-            .then((registered) => {
-              if (registered) showToast('Public key registered', 'success');
-            })
-            .catch((err: unknown) => {
-              console.warn('KeyRegistry setPubKey failed:', err);
-              showToast('Could not register public key', 'error');
-            });
+        if (keyRegSvc) {
+          await keyRegSvc.init(address);
         }
       } catch (err) {
         console.error('Connection failed:', err);
@@ -151,7 +145,7 @@ export function useWallet(
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
 
-    if (localStorage.getItem(DISCONNECTED_KEY) === 'true') return;
+    if (storage.get('disconnected', 'key') === 'true') return;
 
     const list = getCachedWalletsList();
     if (list.length === 0) return;
@@ -186,11 +180,8 @@ export function useWallet(
     if (contract) {
       contract.removeAllListeners();
     }
-    try {
-      localStorage.setItem(DISCONNECTED_KEY, 'true');
-    } catch {
-      // ignore
-    }
+    storage.set('disconnected', 'key', 'true');
+
     setIsConnected(false);
     setContract(null);
     setKeyRegistry(null);
@@ -226,5 +217,7 @@ export function useWallet(
     disconnect,
     addEmail,
     markAsRead,
+    emailService,
+    keyRegistryService,
   };
 }

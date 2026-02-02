@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { Email } from '../types';
-import { sendEmail } from '../services/emailService';
+import { EmailService } from '../services';
 
 interface ComposeFormProps {
   isConnected: boolean;
   userAddress: string;
-  contract: ethers.Contract | null;
-  keyRegistry: ethers.Contract | null;
+  emailService: EmailService;
   onMessageSent: (email: Email) => void;
   onError: (message: string) => void;
   onSuccess: (message: string) => void;
@@ -17,8 +16,7 @@ interface ComposeFormProps {
 export function ComposeForm({
   isConnected,
   userAddress,
-  contract,
-  keyRegistry,
+  emailService,
   onMessageSent,
   onError,
   onSuccess,
@@ -32,14 +30,6 @@ export function ComposeForm({
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!contract) {
-      onError('Not connected to blockchain');
-      return;
-    }
-    if (!keyRegistry) {
-      onError('KeyRegistry not configured');
-      return;
-    }
     if (!ethers.isAddress(recipient)) {
       onError('Invalid recipient address');
       return;
@@ -51,13 +41,10 @@ export function ComposeForm({
 
     setIsSending(true);
     try {
-      const sentEmail = await sendEmail({
-        from: userAddress,
-        to: recipient,
+      const sentEmail = await emailService.send(userAddress, {
+        destination: recipient,
         subject: subject.trim(),
         body: body.trim(),
-        contract,
-        keyRegistry,
       });
 
       onSuccess('Message sent successfully!');
