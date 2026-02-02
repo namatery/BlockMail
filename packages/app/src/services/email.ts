@@ -6,7 +6,7 @@ import type { Contract } from 'ethers';
 import { Email } from '../types';
 import { bytes32ToPk, pkToBytes32 } from '../utils/helpers';
 import { KeyRegistryService } from './keyRegistry';
-import { ipfs } from './ipfsService';
+import { ipfs } from './ipfs';
 import sodium from 'libsodium-wrappers';
 
 export class EmailService {

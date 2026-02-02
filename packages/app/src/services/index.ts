@@ -1,4 +1,4 @@
 export * from './keyRegistry';
-export * from './ipfsService';
+export * from './ipfs';
 export * from './email';
 export * from './storage';
