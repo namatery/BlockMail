@@ -122,6 +122,10 @@ The BlockMail desktop app window should open. You can use the local Hardhat acco
 - `packages/app` → The Electron + React desktop application
 - `packages/contracts` → Solidity smart contracts & deployment scripts
 
+## Acknowledgments
+
+- **Avatars**: Profile/placeholder avatars in the app are from [alohe/avatars](https://github.com/alohe/avatars) — a collection of diverse free avatar images (MIT license).
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
